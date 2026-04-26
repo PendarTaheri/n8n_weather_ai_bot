@@ -1,0 +1,187 @@
+{
+  "name": "My weather bot",
+  "nodes": [
+    {
+      "parameters": {
+        "cityName": "klagenfurt,at",
+        "language": "en"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "14d2855a-4a90-420c-b1cf-f1cdd1452550",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "pj2ua5jRp1KTcstw",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\n\nreturn {\n  weather: data.weather[0].main,\n  description: data.weather[0].description,\n  temperature: data.main.temp,\n  humidity: data.main.humidity,\n  wind_speed: data.wind.speed,\n  cloudiness: data.clouds.all,\n  cityName: data.name,\n  time: $now\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f9584567-d2c5-41f8-85c8-a462c4ff428a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=description :{{ $json.description }}\ntemperature:{{ $json.temperature }}\nhumidity:{{ $json.humidity }}\nwind_speed:{{ $json.wind_speed }}\ncloudiness:{{ $json.cloudiness }}\ncityName:{{ $json.cityName }}\ntime:{{ $json.time }}\nweather: {{ $json.description }}",
+        "options": {
+          "systemMessage": "تو یک تحلیلگر حرفه‌ای هواشناسی و استایلیست شخصی هستی. وظیفه تو این است که داده‌های JSON مربوط به وضعیت آب و هوا (شامل دما، رطوبت، وضعیت آسمان و سرعت باد) را دریافت کنی و بر اساس آن‌ها یک گزارش کوتاه، دوستانه و کاربردی به زبان فارسی ارائه دهی.\n\nدر پاسخ خود باید این موارد را رعایت کنی:\n۱. تحلیل کوتاه وضعیت: ابتدا خیلی خلاصه بگو هوا چطور است (مثلاً: هوا سرد و بارانی است).\n۲. پیشنهاد لباس: دقیقاً بگو چه نوع لباسی برای این هوا مناسب است (مثلاً: پوشیدن بارانی و همراه داشتن چتر الزامی است).\n۳. نکته اضافی: اگر باد شدید است یا نیاز به ضدآفتاب هست، حتماً ذکر کن.\n۴. لحن: لحن تو باید صمیمی اما دقیق باشد. از پاسخ‌های خیلی طولانی پرهیز کن."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ae0d2a4c-1dc8-4161-9487-e91087f7317a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        496,
+        208
+      ],
+      "id": "6116ca5b-059f-4ef7-88d9-23ee799f3cb5",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "36pZkfEIharTHh7t",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7409900749",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "e654d6bd-33dd-44c8-b3a1-0ccd792f80cf",
+      "name": "Send a text message",
+      "webhookId": "28adc9af-7490-4465-ad04-8a36bcd8d507",
+      "credentials": {
+        "telegramApi": {
+          "id": "w1OooVVM74jFm0Qb",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 23,
+              "triggerAtHour": 6,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f2c53f3d-e01c-474d-856b-e40666c805dd",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "42a199dc-1e74-40b9-bf92-eb0edd77cca9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e3052720a4be2aba79119e412d6d7e7d472a95480b34bb7a1bb8c1f1827fb30"
+  },
+  "id": "Ze65PmOdBVCeFzN1",
+  "tags": []
+}
