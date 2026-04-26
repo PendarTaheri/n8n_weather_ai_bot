@@ -16,7 +16,7 @@
       "name": "OpenWeatherMap",
       "credentials": {
         "openWeatherMapApi": {
-          "id": "pj2ua5jRp1KTcstw",
+          "id": "",
           "name": "OpenWeatherMap account"
         }
       }
@@ -65,14 +65,14 @@
       "name": "Mistral Cloud Chat Model",
       "credentials": {
         "mistralCloudApi": {
-          "id": "36pZkfEIharTHh7t",
+          "id": "",
           "name": "Mistral Cloud account"
         }
       }
     },
     {
       "parameters": {
-        "chatId": "7409900749",
+        "chatId": "",
         "text": "={{ $json.output }}",
         "additionalFields": {}
       },
